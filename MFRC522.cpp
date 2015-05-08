@@ -1180,7 +1180,7 @@ byte MFRC522::PCD_MIFARE_Transceive(	byte *sendData,		///< Pointer to the data t
  * Returns a __FlashStringHelper pointer to a status code name.
  * 
  */
-const string *MFRC522::GetStatusCodeName(byte code	///< One of the StatusCode enums.
+const string MFRC522::GetStatusCodeName(byte code	///< One of the StatusCode enums.
 										) {
 	switch (code) {
         case STATUS_OK:				return ("Success.");										break;
@@ -1233,7 +1233,7 @@ byte MFRC522::PICC_GetType(byte sak		///< The SAK byte returned from PICC_Select
  * Returns a __FlashStringHelper pointer to the PICC type name.
  * 
  */
-const string *MFRC522::PICC_GetTypeName(byte piccType	///< One of the PICC_Type enums.
+const string MFRC522::PICC_GetTypeName(byte piccType	///< One of the PICC_Type enums.
 										) {
 	switch (piccType) {
         case PICC_TYPE_ISO_14443_4:		return ("PICC compliant with ISO/IEC 14443-4");	break;
@@ -1246,7 +1246,7 @@ const string *MFRC522::PICC_GetTypeName(byte piccType	///< One of the PICC_Type 
         case PICC_TYPE_TNP3XXX:			return ("MIFARE TNP3XXX");							break;
         case PICC_TYPE_NOT_COMPLETE:	return ("SAK indicates UID is not complete.");		break;
 		case PICC_TYPE_UNKNOWN:
-		default:						return F("Unknown type");							break;
+        default:						return ("Unknown type");							break;
 	}
 } // End PICC_GetTypeName()
 
@@ -1270,7 +1270,7 @@ void MFRC522::PICC_DumpToSerial(Uid *uid	///< Pointer to Uid struct returned fro
 	// PICC type
 	byte piccType = PICC_GetType(uid->sak);
     printf("PICC type: ");
-    printf("%s", PICC_GetTypeName(piccType)->c_str());
+    printf("%s", PICC_GetTypeName(piccType).c_str());
 
 
 	
@@ -1414,7 +1414,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 			status = PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, firstBlock, key, uid);
 			if (status != STATUS_OK) {
                 printf("PCD_Authenticate() failed: ");
-                printf("%s\n", GetStatusCodeName(status)->c_str());
+                printf("%s\n", GetStatusCodeName(status).c_str());
 				return;
 			}
 		}
@@ -1423,7 +1423,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		status = MIFARE_Read(blockAddr, buffer, &byteCount);
 		if (status != STATUS_OK) {
             printf("MIFARE_Read() failed: ");
-            printf("%s\n", GetStatusCodeName(status)->c_str());
+            printf("%s\n", GetStatusCodeName(status).c_str());
 			continue;
 		}
 		// Dump data
@@ -1500,7 +1500,7 @@ void MFRC522::PICC_DumpMifareUltralightToSerial() {
 		status = MIFARE_Read(page, buffer, &byteCount);
 		if (status != STATUS_OK) {
             printf("MIFARE_Read() failed: ");
-            printf("%s\n",GetStatusCodeName(status)->c_str());
+            printf("%s\n",GetStatusCodeName(status).c_str());
 			break;
 		}
 		// Dump data
@@ -1570,7 +1570,7 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
         if( logErrors ) {
             printf("Card did not respond to 0x40 after HALT command. Are you sure it is a UID changeable one?\n");
             printf("Error name: ");
-            printf("%s", GetStatusCodeName(status)->c_str());
+            printf("%s", GetStatusCodeName(status).c_str());
         }
         return false;
     }
@@ -1592,7 +1592,7 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
         if( logErrors ) {
             printf("Error in communication at command 0x43, after successfully executing 0x40\n");
             printf("Error name: ");
-            printf("%s\n", GetStatusCodeName(status)->c_str());
+            printf("%s\n", GetStatusCodeName(status).c_str());
         }
         return false;
     }
@@ -1652,7 +1652,7 @@ bool MFRC522::MIFARE_SetUid(byte* newUid, byte uidSize, bool logErrors) {
                 // We tried, time to give up
                 if ( logErrors ) {
                     printf("Failed to authenticate to card for reading, could not set UID: \n");
-                    printf("%s\n", GetStatusCodeName(status)->c_str());
+                    printf("%s\n", GetStatusCodeName(status).c_str());
                 }
                 return false;
             }
@@ -1660,7 +1660,7 @@ bool MFRC522::MIFARE_SetUid(byte* newUid, byte uidSize, bool logErrors) {
         else {
             if ( logErrors ) {
                printf("PCD_Authenticate() failed: ");
-               printf("%s\n", GetStatusCodeName(status)->c_str());
+               printf("%s\n", GetStatusCodeName(status).c_str());
             }
             return false;
         }
@@ -1673,7 +1673,7 @@ bool MFRC522::MIFARE_SetUid(byte* newUid, byte uidSize, bool logErrors) {
     if ( status != STATUS_OK ) {
         if ( logErrors ) {
             printf("MIFARE_Read() failed: ");
-            printf("%s\n", GetStatusCodeName(status)->c_str());
+            printf("%s\n", GetStatusCodeName(status).c_str());
             printf("Are you sure your KEY A for sector 0 is 0xFFFFFFFFFFFF?\n");
         }
         return false;
@@ -1705,7 +1705,7 @@ bool MFRC522::MIFARE_SetUid(byte* newUid, byte uidSize, bool logErrors) {
     if (status != STATUS_OK) {
         if ( logErrors ) {
             printf("MIFARE_Write() failed: ");
-            printf("%s\n",GetStatusCodeName(status)->c_str());
+            printf("%s\n",GetStatusCodeName(status).c_str());
         }
         return false;
     }
@@ -1731,7 +1731,7 @@ bool MFRC522::MIFARE_UnbrickUidSector(bool logErrors) {
     if (status != STATUS_OK) {
         if ( logErrors ) {
             printf("MIFARE_Write() failed: ");
-            printf("%s\n",GetStatusCodeName(status)->c_str());
+            printf("%s\n",GetStatusCodeName(status).c_str());
         }
         return false;
     }

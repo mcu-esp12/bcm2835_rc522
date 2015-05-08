@@ -78,6 +78,8 @@
 //#include <Arduino.h>
 //#include <SPI.h>
 #include <linux/types.h>
+#include <stdint.h>
+#include <cstring>
 #include <string>
 
 using namespace std;
