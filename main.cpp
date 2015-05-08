@@ -103,7 +103,7 @@ bool try_key(MFRC522::MIFARE_Key *key)
         dump_byte_array((*key).keyByte, MFRC522::MF_KEY_SIZE);
         printf("\n");
         // Dump block data
-        printf("Block "); printf("%u", block); print(":");
+        printf("Block "); printf("%u", block); printf(":");
         dump_byte_array(buffer, 16);
         //Serial.println();
         printf("\n");
