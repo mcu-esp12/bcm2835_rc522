@@ -138,7 +138,7 @@ void loop() {
     printf("PICC type: ");
     byte piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
     //Serial.println(mfrc522.PICC_GetTypeName(piccType));
-    printf("%s\n", mfrc522.PICC_GetTypeName(piccType)->c_str());
+    printf("%s\n", mfrc522.PICC_GetTypeName(piccType).c_str());
     // Try the known default keys
     MFRC522::MIFARE_Key key;
     for (byte k = 0; k < NR_KNOWN_KEYS; k++) {
