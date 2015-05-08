@@ -76,7 +76,7 @@ void dump_byte_array(byte *buffer, byte bufferSize) {
  */
 bool try_key(MFRC522::MIFARE_Key *key)
 {
-    boolean result = false;
+    bool result = false;
     byte buffer[18];
     byte block = 0;
     byte status;
