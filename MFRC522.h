@@ -75,8 +75,6 @@
 #ifndef MFRC522_h
 #define MFRC522_h
 
-//#include <Arduino.h>
-//#include <SPI.h>
 #include <linux/types.h>
 #include <stdint.h>
 #include <cstring>

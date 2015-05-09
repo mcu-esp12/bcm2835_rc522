@@ -78,8 +78,14 @@ void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One o
 								) {
 //	digitalWrite(_chipSelectPin, LOW);		// Select slave
 //	SPI.transfer(reg & 0x7E);				// MSB == 0 is for writing. LSB is not used in address. Datasheet section 8.1.2.3.
-    bcm2835_spi_transfer(reg & 0x7E);
-    bcm2835_spi_transfer(value);
+//    bcm2835_spi_transfer(reg & 0x7E);
+//    bcm2835_spi_transfer(value);
+
+    char buff[2];
+
+    buff[0] = (char)((reg) & 0x7E);
+    buff[1] = (char)value;
+    bcm2835_spi_transfern(buff,2);
 //	SPI.transfer(value);
 //	digitalWrite(_chipSelectPin, HIGH);		// Release slave again
 } // End PCD_WriteRegister()
@@ -93,11 +99,12 @@ void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One o
 									byte *values	///< The values to write. Byte array.
 								) {
 //	digitalWrite(_chipSelectPin, LOW);		// Select slave
-//	SPI.transfer(reg & 0x7E);				// MSB == 0 is for writing. LSB is not used in address. Datasheet section 8.1.2.3.
-    bcm2835_spi_transfer(reg & 0x7E);
+//	SPI.transfer(reg & 0x7E);				// MSB == 0 is for writing. LSB is not used in address. Datasheet section 8.1.2.3.    
+    //bcm2835_spi_transfer(reg & 0x7E);
+
 	for (byte index = 0; index < count; index++) {
         //SPI.transfer(values[index]);
-        bcm2835_spi_transfer(values[index]);
+       PCD_WriteRegister(reg, values[index]);
 	}
 //	digitalWrite(_chipSelectPin, HIGH);		// Release slave again
 } // End PCD_WriteRegister()
@@ -108,14 +115,19 @@ void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One o
  */
 byte MFRC522::PCD_ReadRegister(	byte reg	///< The register to read from. One of the PCD_Register enums.
 								) {
-	byte value;
+    //byte value;
 //	digitalWrite(_chipSelectPin, LOW);			// Select slave
 //	SPI.transfer(0x80 | (reg & 0x7E));			// MSB == 1 is for reading. LSB is not used in address. Datasheet section 8.1.2.3.
 //	value = SPI.transfer(0);					// Read the value back. Send 0 to stop reading.
-    bcm2835_spi_transfer(0x80 | (reg & 0x7E));
-    value = bcm2835_spi_transfer(0);
+//    bcm2835_spi_transfer(0x80 | (reg & 0x7E));
+//    value = bcm2835_spi_transfer(0);
 //	digitalWrite(_chipSelectPin, HIGH);			// Release slave again
-	return value;
+
+    char buff[2];
+    buff[0] = ((reg) & 0x7E) | 0x80;
+    bcm2835_spi_transfern(buff, 2);
+    return (uint8_t)buff[1];
+
 } // End PCD_ReadRegister()
 
 /**
@@ -136,7 +148,7 @@ void MFRC522::PCD_ReadRegister(	byte reg,		///< The register to read from. One o
 //	digitalWrite(_chipSelectPin, LOW);		// Select slave
 	count--;								// One read is performed outside of the loop
 //	SPI.transfer(address);					// Tell MFRC522 which address we want to read
-    bcm2835_spi_transfer(address);
+    //bcm2835_spi_transfer(address);
 	while (index < count) {
 		if (index == 0 && rxAlign) {		// Only update bit positions rxAlign..7 in values[0]
 			// Create bit mask for bit positions rxAlign..7
@@ -1399,7 +1411,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		// Sector number - only on first line
 		if (isSectorTrailer) {
             printf(sector < 10 ? "   " : "  "); // Pad with spaces
-            printf("%u", sector);
+            printf("%02d", sector);
             printf("   ");
 		}
 		else {
@@ -1407,7 +1419,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		}
 		// Block number
         printf(blockAddr < 10 ? "   " : (blockAddr < 100 ? "  "	 : " ")); // Pad with spaces
-        printf("%u", blockAddr);
+        printf("%02d", blockAddr);
         printf("  ");
 		// Establish encrypted communications before reading the first block
 		if (isSectorTrailer) {
@@ -1429,7 +1441,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		// Dump data
 		for (byte index = 0; index < 16; index++) {
             printf(buffer[index] < 0x10 ? " 0" : " ");
-            printf("0x%02x", buffer[index]);
+            printf("0x%02d", buffer[index]);
 			if ((index % 4) == 3) {
                 printf(" ");
 			}
@@ -1463,9 +1475,9 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		if (firstInGroup) {
 			// Print access bits
             printf(" [ ");
-            printf("%u" ,(g[group] >> 2) & 1); printf(" ");
-            printf("%u", (g[group] >> 1) & 1); printf(" ");
-            printf("%u", (g[group] >> 0) & 1);
+            printf("%02d" ,(g[group] >> 2) & 1); printf(" ");
+            printf("%02d", (g[group] >> 1) & 1); printf(" ");
+            printf("%02d", (g[group] >> 0) & 1);
             printf(" ] ");
 			if (invertedError) {
                 printf(" Inverted access bits did not match! ");
@@ -1474,8 +1486,8 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		
 		if (group != 3 && (g[group] == 1 || g[group] == 6)) { // Not a sector trailer, a value block
 			long value = (long(buffer[3])<<24) | (long(buffer[2])<<16) | (long(buffer[1])<<8) | long(buffer[0]);
-            printf(" Value="); printf("0x%02x", value);
-            printf(" Adr="); printf("0x%02x", buffer[12]);
+            printf(" Value="); printf("0x%02d", value);
+            printf(" Adr="); printf("0x%02d", buffer[12]);
 		}
         printf("\n");
 	}
@@ -1507,12 +1519,12 @@ void MFRC522::PICC_DumpMifareUltralightToSerial() {
 		for (byte offset = 0; offset < 4; offset++) {
 			i = page + offset;
             printf(i < 10 ? "  " : " "); // Pad with spaces
-            printf("%u", i);
+            printf("%02d", i);
             printf("  ");
 			for (byte index = 0; index < 4; index++) {
 				i = 4 * offset + index;
                 printf(buffer[i] < 0x10 ? " 0" : " ");
-                printf("0x%02x", buffer[i]);
+                printf("0x%02d", buffer[i]);
 			}
             printf("\n");
 		}
@@ -1577,9 +1589,9 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
     if ( received != 1 || response[0] != 0x0A ) {
         if ( logErrors ) {
             printf("Got bad response on backdoor 0x40 command: ");
-            printf("0x%02x", response[0]);
+            printf("0x%02d", response[0]);
             printf(" (");
-            printf("%u", validBits);
+            printf("%02d", validBits);
             printf(" valid bits)\r\n");
         }
         return false;
@@ -1599,9 +1611,9 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
     if ( received != 1 || response[0] != 0x0A ) {
         if ( logErrors ) {
             printf("Got bad response on backdoor 0x43 command: ");
-            printf("%u", response[0]);
+            printf("%02d", response[0]);
             printf(" (");
-            printf("%u", validBits);
+            printf("%02d", validBits);
             printf(" valid bits)\r\n");
         }
         return false;
