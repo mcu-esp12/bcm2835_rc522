@@ -1359,7 +1359,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		// Sector number - only on first line
 		if (isSectorTrailer) {
             printf(sector < 10 ? "   " : "  "); // Pad with spaces
-            printf("%02d", sector);
+            printf("%02X", sector);
             printf("   ");
 		}
 		else {
@@ -1367,7 +1367,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		}
 		// Block number
         printf(blockAddr < 10 ? "   " : (blockAddr < 100 ? "  "	 : " ")); // Pad with spaces
-        printf("%02d", blockAddr);
+        printf("%02X", blockAddr);
         printf("  ");
 		// Establish encrypted communications before reading the first block
 		if (isSectorTrailer) {
@@ -1389,7 +1389,7 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		// Dump data
 		for (byte index = 0; index < 16; index++) {
             printf(buffer[index] < 0x10 ? " 0" : " ");
-            printf("0x%02d", buffer[index]);
+            printf("0x%02X", buffer[index]);
 			if ((index % 4) == 3) {
                 printf(" ");
 			}
@@ -1423,9 +1423,9 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		if (firstInGroup) {
 			// Print access bits
             printf(" [ ");
-            printf("%02d" ,(g[group] >> 2) & 1); printf(" ");
-            printf("%02d", (g[group] >> 1) & 1); printf(" ");
-            printf("%02d", (g[group] >> 0) & 1);
+            printf("%02X" ,(g[group] >> 2) & 1); printf(" ");
+            printf("%02X", (g[group] >> 1) & 1); printf(" ");
+            printf("%02X", (g[group] >> 0) & 1);
             printf(" ] ");
 			if (invertedError) {
                 printf(" Inverted access bits did not match! ");
@@ -1434,8 +1434,8 @@ void MFRC522::PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to U
 		
 		if (group != 3 && (g[group] == 1 || g[group] == 6)) { // Not a sector trailer, a value block
 			long value = (long(buffer[3])<<24) | (long(buffer[2])<<16) | (long(buffer[1])<<8) | long(buffer[0]);
-            printf(" Value="); printf("0x%02d", value);
-            printf(" Adr="); printf("0x%02d", buffer[12]);
+            printf(" Value="); printf("0x%02X", value);
+            printf(" Adr="); printf("0x%02X", buffer[12]);
 		}
         printf("\n");
 	}
@@ -1467,12 +1467,12 @@ void MFRC522::PICC_DumpMifareUltralightToSerial() {
 		for (byte offset = 0; offset < 4; offset++) {
 			i = page + offset;
             printf(i < 10 ? "  " : " "); // Pad with spaces
-            printf("%02d", i);
+            printf("%02X", i);
             printf("  ");
 			for (byte index = 0; index < 4; index++) {
 				i = 4 * offset + index;
                 printf(buffer[i] < 0x10 ? " 0" : " ");
-                printf("0x%02d", buffer[i]);
+                printf("0x%02X", buffer[i]);
 			}
             printf("\n");
 		}
@@ -1537,9 +1537,9 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
     if ( received != 1 || response[0] != 0x0A ) {
         if ( logErrors ) {
             printf("Got bad response on backdoor 0x40 command: ");
-            printf("0x%02d", response[0]);
+            printf("0x%02X", response[0]);
             printf(" (");
-            printf("%02d", validBits);
+            printf("%02X", validBits);
             printf(" valid bits)\r\n");
         }
         return false;
@@ -1559,9 +1559,9 @@ bool MFRC522::MIFARE_OpenUidBackdoor(bool logErrors) {
     if ( received != 1 || response[0] != 0x0A ) {
         if ( logErrors ) {
             printf("Got bad response on backdoor 0x43 command: ");
-            printf("%02d", response[0]);
+            printf("%02X", response[0]);
             printf(" (");
-            printf("%02d", validBits);
+            printf("%02X", validBits);
             printf(" valid bits)\r\n");
         }
         return false;

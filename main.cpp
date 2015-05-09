@@ -58,7 +58,7 @@ byte knownKeys[NR_KNOWN_KEYS][MFRC522::MF_KEY_SIZE] =  {
 void dump_byte_array(byte *buffer, byte bufferSize) {
     for (byte i = 0; i < bufferSize; i++) {
         printf(buffer[i] < 0x10 ? " 0" : " ");
-        printf("%02x", buffer[i]);
+        printf("%02X", buffer[i]);
     }
 }
 
