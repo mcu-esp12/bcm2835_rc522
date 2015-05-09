@@ -1,7 +1,5 @@
 /*
-* MFRC522.cpp - Library to use ARDUINO RFID MODULE KIT 13.56 MHZ WITH TAGS SPI W AND R BY COOQROBOT.
-* NOTE: Please also check the comments in MFRC522.h - they provide useful hints and background information.
-* Released into the public domain.
+* MFRC522.cpp - Library to use Raspberry Pi 2 B with 13.56 MHZ WITH TAGS SPI W AND R BY Elgolondrino.
 */
 
 #include <MFRC522.h>
@@ -14,26 +12,9 @@
  * Constructor.
  * Prepares the output pins
  */
-MFRC522::MFRC522() {
-	// Set the chipSelectPin as digital output, do not select the slave yet
-    // _chipSelectPin = chipSelectPin;
-    // pinMode(_chipSelectPin, OUTPUT);
-    // digitalWrite(_chipSelectPin, HIGH);
-	
-	// Set the resetPowerDownPin as digital output, do not reset or power down.
-//	_resetPowerDownPin = resetPowerDownPin;
-//	pinMode(_resetPowerDownPin, OUTPUT);
-//	digitalWrite(_resetPowerDownPin, LOW);
-//    if (!bcm2835_init()) {
-//        printf("Couldn't Initialise BCM2835 gpio in Constructor...\n");
-//    }
-//    bcm2835_gpio_fsel(PIN, BCM2835_GPIO_FSEL_OUTP);
-//    bcm2835_gpio_write(PIN, LOW);
-	
-//	// Set SPI bus to work with MFRC522 chip.
-//    setSPIConfig();
+MFRC522::MFRC522() {	
 }
- // End constructor
+// End constructor
 
 void MFRC522::postConstruct()
 {  if (!bcm2835_init()) {
@@ -72,20 +53,12 @@ void MFRC522::setSPIConfig() {
  * The interface is described in the datasheet section 8.1.2.
  */
 void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One of the PCD_Register enums.
-					byte value		///< The value to write.
-								) {
-//	digitalWrite(_chipSelectPin, LOW);		// Select slave
-//	SPI.transfer(reg & 0x7E);				// MSB == 0 is for writing. LSB is not used in address. Datasheet section 8.1.2.3.
-//    bcm2835_spi_transfer(reg & 0x7E);
-//    bcm2835_spi_transfer(value);
-
+                                    byte value		///< The value to write.
+                               ) {
     char buff[2];
-
     buff[0] = (char)((reg) & 0x7E);
     buff[1] = (char)value;
     bcm2835_spi_transfern(buff, 2);
-//	SPI.transfer(value);
-//	digitalWrite(_chipSelectPin, HIGH);		// Release slave again
 } // End PCD_WriteRegister()
 
 /**
@@ -95,16 +68,10 @@ void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One o
 void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One of the PCD_Register enums.
 									byte count,		///< The number of bytes to write to the register
 									byte *values	///< The values to write. Byte array.
-								) {
-//	digitalWrite(_chipSelectPin, LOW);		// Select slave
-//	SPI.transfer(reg & 0x7E);				// MSB == 0 is for writing. LSB is not used in address. Datasheet section 8.1.2.3.    
-    //bcm2835_spi_transfer(reg & 0x7E);
-
-	for (byte index = 0; index < count; index++) {
-        //SPI.transfer(values[index]);
-       PCD_WriteRegister(reg, values[index]);
+                               ) {
+    for(byte index = 0; index < count; index++) {
+        PCD_WriteRegister(reg, values[index]);
 	}
-//	digitalWrite(_chipSelectPin, HIGH);		// Release slave again
 } // End PCD_WriteRegister()
 
 /**
@@ -112,15 +79,7 @@ void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One o
  * The interface is described in the datasheet section 8.1.2.
  */
 byte MFRC522::PCD_ReadRegister(	byte reg	///< The register to read from. One of the PCD_Register enums.
-								) {
-    //byte value;
-//	digitalWrite(_chipSelectPin, LOW);			// Select slave
-//	SPI.transfer(0x80 | (reg & 0x7E));			// MSB == 1 is for reading. LSB is not used in address. Datasheet section 8.1.2.3.
-//	value = SPI.transfer(0);					// Read the value back. Send 0 to stop reading.
-//    bcm2835_spi_transfer(0x80 | (reg & 0x7E));
-//    value = bcm2835_spi_transfer(0);
-//	digitalWrite(_chipSelectPin, HIGH);			// Release slave again
-
+                              ) {
     char buff[2];
     buff[0] = ((reg) & 0x7E) | 0x80;
     bcm2835_spi_transfern(buff, 2);
@@ -140,13 +99,11 @@ void MFRC522::PCD_ReadRegister(	byte reg,		///< The register to read from. One o
 	if (count == 0) {
 		return;
 	}
-	//Serial.print("Reading "); 	Serial.print(count); Serial.println(" bytes from register.");
+
 	byte address = 0x80 | (reg & 0x7E);		// MSB == 1 is for reading. LSB is not used in address. Datasheet section 8.1.2.3.
 	byte index = 0;							// Index in values array.
-//	digitalWrite(_chipSelectPin, LOW);		// Select slave
 	count--;								// One read is performed outside of the loop
-//	SPI.transfer(address);					// Tell MFRC522 which address we want to read
-        bcm2835_spi_transfer(address);
+    bcm2835_spi_transfer(address);
 	while (index < count) {
 		if (index == 0 && rxAlign) {		// Only update bit positions rxAlign..7 in values[0]
 			// Create bit mask for bit positions rxAlign..7
@@ -154,21 +111,17 @@ void MFRC522::PCD_ReadRegister(	byte reg,		///< The register to read from. One o
 			for (byte i = rxAlign; i <= 7; i++) {
 				mask |= (1 << i);
 			}
-			// Read value and tell that we want to read the same address again.
-            //byte value = SPI.transfer(address);
+			// Read value and tell that we want to read the same address again.    
             byte value = bcm2835_spi_transfer(address);
 			// Apply mask to both current value of values[0] and the new data in value.
 			values[0] = (values[index] & ~mask) | (value & mask);
 		}
-		else { // Normal case
-            //values[index] = SPI.transfer(address);	// Read value and tell that we want to read the same address again.
-            values[index] = bcm2835_spi_transfer(address);
+		else { // Normal case           
+           values[index] = bcm2835_spi_transfer(address);     // Read value and tell that we want to read the same address again.
 		}
 		index++;
 	}
-//	values[index] = SPI.transfer(0);			// Read the final byte. Send 0 to stop reading.
-    values[index] = bcm2835_spi_transfer(0);
-//	digitalWrite(_chipSelectPin, HIGH);			// Release slave again
+    values[index] = bcm2835_spi_transfer(0);                  // Read the final byte. Send 0 to stop reading.
 } // End PCD_ReadRegister()
 
 /**
@@ -238,12 +191,9 @@ byte MFRC522::PCD_CalculateCRC(	byte *data,		///< In: Pointer to the data to tra
  * Initializes the MFRC522 chip.
  */
 void MFRC522::PCD_Init() {
-//	if (digitalRead(_resetPowerDownPin) == LOW) {	//The MFRC522 chip is in power down mode.
-//		digitalWrite(_resetPowerDownPin, HIGH);		// Exit power down mode. This triggers a hard reset.
-		// Section 8.8.2 in the datasheet says the oscillator start-up time is the start up time of the crystal + 37,74�s. Let us be generous: 50ms.
-    if(bcm2835_gpio_lev(PIN) == LOW) {
-        bcm2835_gpio_write(PIN, HIGH);
-		delay(50);
+    if(bcm2835_gpio_lev(PIN) == LOW) {   //The MFRC522 chip is in power down mode.
+        bcm2835_gpio_write(PIN, HIGH);   // Exit power down mode. This triggers a hard reset.
+        delay(50);                       // Section 8.8.2 in the datasheet says the oscillator start-up time is the start up time of the crystal + 37,74�s. Let us be generous: 50ms.
 	}
 	else { // Perform a soft reset
 		PCD_Reset();

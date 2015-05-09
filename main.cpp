@@ -30,12 +30,13 @@
 #include <cstdio>
 #include <signal.h>
 
+// Volatile boolean variable to Terminate programm with SIGINT
 volatile bool keepReading = true;
-MFRC522 mfrc522;
-   // Create MFRC522 instance.
 
-// Number of known default keys (hard-coded)
-// NOTE: Synchronize the NR_KNOWN_KEYS define with the defaultKeys[] array
+// Create MFRC522 instance.
+MFRC522 mfrc522;
+
+
 #define NR_KNOWN_KEYS   8
 // Known keys, see: https://code.google.com/p/mfcuk/wiki/MifareClassicDefaultKeys
 byte knownKeys[NR_KNOWN_KEYS][MFRC522::MF_KEY_SIZE] =  {
@@ -84,9 +85,7 @@ bool try_key(MFRC522::MIFARE_Key *key)
 
     // Serial.println(F("Authenticating using key A..."));
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, key, &(mfrc522.uid));
-    if (status != MFRC522::STATUS_OK) {
-        // Serial.print(F("PCD_Authenticate() failed: "));
-        // Serial.println(mfrc522.GetStatusCodeName(status));
+    if (status != MFRC522::STATUS_OK) {        
         return false;
     }
 
@@ -94,8 +93,8 @@ bool try_key(MFRC522::MIFARE_Key *key)
     byte byteCount = sizeof(buffer);
     status = mfrc522.MIFARE_Read(block, buffer, &byteCount);
     if (status != MFRC522::STATUS_OK) {
-        // Serial.print(F("MIFARE_Read() failed: "));
-        // Serial.println(mfrc522.GetStatusCodeName(status));
+        // printf(("MIFARE_Read() failed: "));
+        // printf("%s\n"mfrc522.GetStatusCodeName(status).c_str());
     }
     else {
         // Successful read
@@ -105,11 +104,9 @@ bool try_key(MFRC522::MIFARE_Key *key)
         printf("\n");
         // Dump block data
         printf("Block "); printf("%u", block); printf(":");
-        dump_byte_array(buffer, 16);
-        //Serial.println();
+        dump_byte_array(buffer, 16);        
         printf("\n");
-    }
-    //Serial.println();
+    }    
     printf("\n");
 
     mfrc522.PICC_HaltA();       // Halt PICC
@@ -117,9 +114,7 @@ bool try_key(MFRC522::MIFARE_Key *key)
     return result;
 }
 
-/*
- * Main loop.
- */
+
 void loop() {
     // Look for new cards
     if ( ! mfrc522.PICC_IsNewCardPresent())
@@ -130,15 +125,11 @@ void loop() {
         return;
 
     // Show some details of the PICC (that is: the tag/card)
-    //Serial.print(F("Card UID:"));
     printf("Card UID:");
-    dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-    //Serial.println();
-    printf("\n");
-    //Serial.print(F("PICC type: "));
+    dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);   
+    printf("\n");   
     printf("PICC type: ");
-    byte piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
-    //Serial.println(mfrc522.PICC_GetTypeName(piccType));
+    byte piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);    
     printf("%s\n", mfrc522.PICC_GetTypeName(piccType).c_str());
     // Try the known default keys
     MFRC522::MIFARE_Key key;
@@ -166,127 +157,12 @@ int main() {
     //MFRC522 mfrc522;
     mfrc522.postConstruct();
     mfrc522.PCD_Init();         // Init MFRC522 card
+    // Change the block number to get information from by default it's 0
     printf("Try the most used default keys to print block 0 of a MIFARE PICC.\n");
-
     while(keepReading) {
         loop();
     }
     bcm2835_spi_end();
     bcm2835_close();
-
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//#include <iostream>
-//#include <unistd.h>
-//#include "rfid.h"
-//#include "rc522.h"
-//#include "bcm2835.h"
-//using namespace std;
-
-//#define  DEFAULT_SPI_SPEED 5000L
-
-//uint8_t  initRfidReader();
-
-//char     statusRfidReader;
-//uint16_t CType=0;
-//uint8_t  serialNumber[10];
-//uint8_t  serialNumberLength = 0;
-//uint8_t  noTagFoundCount = 0;
-//char     rfidChipSerialNumber[23];
-//char     rfidChipSerialNumberRecentlyDetected[23];
-//char     *p;
-//int      loopCounter;
-
-//int main()
-//{
-//    initRfidReader();
-//    InitRc522();
-
-//    for (;;) {
-//        statusRfidReader = find_tag( &CType );
-//        if (statusRfidReader == TAG_NOTAG) {
-//             // The status that no tag is found is sometimes set even when a tag is within reach of the tag reader
-//             // to prevent that the reset is performed the no tag event has to take place multiple times (ger: entrprellen)
-//             if (noTagFoundCount > 2) {
-//                 // Sets the content of the array 'rfidChipSerialNumberRecentlyDetected' back to zero
-//                 memset(&rfidChipSerialNumberRecentlyDetected[0], 0, sizeof(rfidChipSerialNumberRecentlyDetected));
-//                 noTagFoundCount = 0;
-//             }
-//             else {
-//                 noTagFoundCount++;
-//             }
-//             usleep(200000);
-//             continue;
-//        } else if (statusRfidReader != TAG_OK && statusRfidReader != TAG_COLLISION) {
-//            continue;
-//        }
-//        if (select_tag_sn(serialNumber, &serialNumberLength) != TAG_OK) {
-//            continue;
-//        }
-
-//        // Is a successful detected, the counter will be set to zero
-//        noTagFoundCount = 0;
-//        p = rfidChipSerialNumber;
-//        for (loopCounter = 0; loopCounter < serialNumberLength; loopCounter++) {
-//            sprintf(p,"%02x", serialNumber[loopCounter]);
-//            p += 2;
-//        }
-
-//        // Only when the serial number of the currently detected tag differs from the
-//        // recently detected tag the callback will be executed with the serial number
-//        if(strcmp(rfidChipSerialNumberRecentlyDetected, rfidChipSerialNumber) != 0)
-//        {
-//            //Local<Value> argv[argc] = { Local<Value>::New(String::New(&rfidChipSerialNumber[1])) };
-//            //callback->Call(Context::GetCurrent()->Global(), argc, argv);
-//        }
-
-//        // Preserves the current detected serial number, so that it can be used
-//        // for future evaluations
-//        strcpy(rfidChipSerialNumberRecentlyDetected, rfidChipSerialNumber);
-
-//        *(p++) = 0;
-//    }
-
-//    bcm2835_spi_end();
-//    bcm2835_close();
-
-//    return 0;
-//}
-
-//uint8_t initRfidReader() {
-//    uint16_t SPI_SPEED;
-
-//    SPI_SPEED = (uint16_t)(250000L / DEFAULT_SPI_SPEED);
-//    if (!bcm2835_init()) {
-//        return 1;
-//    }
-
-//    bcm2835_spi_begin();
-//    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
-//    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   // The default
-//    bcm2835_spi_setClockDivider(SPI_SPEED); 							  // The default
-//    bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
-//    bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
-//    return 0;
-//}
