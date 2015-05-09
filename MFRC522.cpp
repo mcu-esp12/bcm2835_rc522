@@ -12,7 +12,7 @@
 #define  PIN RPI_V2_GPIO_P1_22
 /**
  * Constructor.
- * Prepares the output pins.
+ * Prepares the output pins
  */
 MFRC522::MFRC522() {
 	// Set the chipSelectPin as digital output, do not select the slave yet
