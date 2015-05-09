@@ -28,8 +28,10 @@
 #include <bcm2835.h>
 #include <MFRC522.h>
 #include <cstdio>
+#include <signal.h>
 
-MFRC522 mfrc522;   // Create MFRC522 instance.
+volatile bool keepReading = true;
+   // Create MFRC522 instance.
 
 // Number of known default keys (hard-coded)
 // NOTE: Synchronize the NR_KNOWN_KEYS define with the defaultKeys[] array
@@ -49,14 +51,12 @@ byte knownKeys[NR_KNOWN_KEYS][MFRC522::MF_KEY_SIZE] =  {
 /*
  * Initialize.
  */
-void setup() {
-//    Serial.begin(9600);         // Initialize serial communications with the PC
-//    while (!Serial);            // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
-//    SPI.begin();                // Init SPI bus
-    mfrc522.postConstruct();
-    mfrc522.PCD_Init();         // Init MFRC522 card
-    printf("Try the most used default keys to print block 0 of a MIFARE PICC.\n");
-}
+//void setup() {
+////    Serial.begin(9600);         // Initialize serial communications with the PC
+////    while (!Serial);            // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
+////    SPI.begin();                // Init SPI bus
+
+//}
 
 /*
  * Helper routine to dump a byte array as hex values to Serial.
@@ -64,7 +64,7 @@ void setup() {
 void dump_byte_array(byte *buffer, byte bufferSize) {
     for (byte i = 0; i < bufferSize; i++) {
         printf(buffer[i] < 0x10 ? " 0" : " ");
-        printf("0x%02x", buffer[i]);
+        printf("%02x", buffer[i]);
     }
 }
 
@@ -119,7 +119,7 @@ bool try_key(MFRC522::MIFARE_Key *key)
 /*
  * Main loop.
  */
-void loop() {
+void loop(MFRC522 &mfrc522) {
     // Look for new cards
     if ( ! mfrc522.PICC_IsNewCardPresent())
         return;
@@ -155,10 +155,20 @@ void loop() {
     }
 }
 
+void end_Signal(int signal) {
+     //printf("Signal : %u\n", signal);
+     keepReading = false;
+}
+
 int main() {
-    setup();
-    while(true) {
-        loop();
+    signal(SIGINT, end_Signal);
+    MFRC522 mfrc522;
+    mfrc522.postConstruct();
+    mfrc522.PCD_Init();         // Init MFRC522 card
+    printf("Try the most used default keys to print block 0 of a MIFARE PICC.\n");
+
+    while(keepReading) {
+        loop(mfrc522);
     }
     bcm2835_spi_end();
     bcm2835_close();
