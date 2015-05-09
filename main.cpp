@@ -3,7 +3,7 @@
  * Typical pin or GPIO layout used:                |
  * ------------------------------------------------*
  *             MFRC522      Raspberry Pi B+ &      |
- *             Reader/PCD   2 B                    |
+ * Power &     Reader/PCD   2 B                    |
  * Signal      Pin          Pin           GPIO     |
  * ------------------------------------------------*
  * RST/Reset   RST          22            25       |
@@ -11,6 +11,9 @@
  * SPI MOSI    MOSI         19            10       |
  * SPI MISO    MISO         21            9        |
  * SPI SCK     SCK          23            11       |
+ * POWER       3.3V         1  / or 17             |
+ *             GND          39 / Any               |
+ *             IRQ          NONE           NONE    |
  * ------------------------------------------------*
  */
 
