@@ -9,7 +9,7 @@
 #include <bcm2835.h>
 
 #define  DEFAULT_SPI_SPEED 5000L
-#define  PIN RPI_V2_GPIO_P1_22
+#define  PIN RPI_GPIO_P1_12
 /**
  * Constructor.
  * Prepares the output pins
@@ -58,7 +58,7 @@ void MFRC522::setSPIConfig() {
     bcm2835_spi_begin();
     bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);      // The default
     bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);                   // The default
-    bcm2835_spi_setClockDivider(SPI_SPEED); 							  // The default
+    bcm2835_spi_setClockDivider(SPI_SPEED); 			  // The default
     bcm2835_spi_chipSelect(BCM2835_SPI_CS0);                      // The default
     bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);      // the default
 } // End setSPIConfig()
@@ -72,7 +72,7 @@ void MFRC522::setSPIConfig() {
  * The interface is described in the datasheet section 8.1.2.
  */
 void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One of the PCD_Register enums.
-									byte value		///< The value to write.
+					byte value		///< The value to write.
 								) {
 //	digitalWrite(_chipSelectPin, LOW);		// Select slave
 //	SPI.transfer(reg & 0x7E);				// MSB == 0 is for writing. LSB is not used in address. Datasheet section 8.1.2.3.
@@ -83,7 +83,7 @@ void MFRC522::PCD_WriteRegister(	byte reg,		///< The register to write to. One o
 
     buff[0] = (char)((reg) & 0x7E);
     buff[1] = (char)value;
-    bcm2835_spi_transfern(buff,2);
+    bcm2835_spi_transfern(buff, 2);
 //	SPI.transfer(value);
 //	digitalWrite(_chipSelectPin, HIGH);		// Release slave again
 } // End PCD_WriteRegister()
@@ -146,7 +146,7 @@ void MFRC522::PCD_ReadRegister(	byte reg,		///< The register to read from. One o
 //	digitalWrite(_chipSelectPin, LOW);		// Select slave
 	count--;								// One read is performed outside of the loop
 //	SPI.transfer(address);					// Tell MFRC522 which address we want to read
-    //bcm2835_spi_transfer(address);
+        bcm2835_spi_transfer(address);
 	while (index < count) {
 		if (index == 0 && rxAlign) {		// Only update bit positions rxAlign..7 in values[0]
 			// Create bit mask for bit positions rxAlign..7
@@ -383,7 +383,7 @@ bool MFRC522::PCD_PerformSelfTest() {
 
     // Verify that the results match up to our expectations
     for (i = 0; i < 64; i++) {
-        if (result[i] != pgm_read_byte(&(reference[i]))) {
+        if (result[i] != reference[i]) {
             return false;
         }
     }

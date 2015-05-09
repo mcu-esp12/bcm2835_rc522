@@ -31,6 +31,7 @@
 #include <signal.h>
 
 volatile bool keepReading = true;
+MFRC522 mfrc522;
    // Create MFRC522 instance.
 
 // Number of known default keys (hard-coded)
@@ -119,7 +120,7 @@ bool try_key(MFRC522::MIFARE_Key *key)
 /*
  * Main loop.
  */
-void loop(MFRC522 &mfrc522) {
+void loop() {
     // Look for new cards
     if ( ! mfrc522.PICC_IsNewCardPresent())
         return;
@@ -162,13 +163,13 @@ void end_Signal(int signal) {
 
 int main() {
     signal(SIGINT, end_Signal);
-    MFRC522 mfrc522;
+    //MFRC522 mfrc522;
     mfrc522.postConstruct();
     mfrc522.PCD_Init();         // Init MFRC522 card
     printf("Try the most used default keys to print block 0 of a MIFARE PICC.\n");
 
     while(keepReading) {
-        loop(mfrc522);
+        loop();
     }
     bcm2835_spi_end();
     bcm2835_close();
