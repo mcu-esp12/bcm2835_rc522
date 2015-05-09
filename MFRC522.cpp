@@ -9,10 +9,10 @@
 #include <bcm2835.h>
 
 #define  DEFAULT_SPI_SPEED 5000L
-#define  PIN RPI_BPLUS_GPIO_J8_22
+#define  PIN RPI_V2_GPIO_P1_22
 /**
  * Constructor.
- * Prepares the output pins.
+ * Prepares the output pins
  */
 MFRC522::MFRC522() {
 	// Set the chipSelectPin as digital output, do not select the slave yet
