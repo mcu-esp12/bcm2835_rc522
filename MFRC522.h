@@ -1,7 +1,6 @@
 /**
- * MFRC522.h - Library to use ARDUINO RFID MODULE KIT 13.56 MHZ WITH TAGS SPI W AND R BY COOQROBOT.
- * Based on code Dr.Leong   ( WWW.B2CQSHOP.COM )
- * Created by Miguel Balboa (circuitito.com), Jan, 2012.
+ * MFRC522.h - Library to use Raspberry Pi 2 B or Raspberry Pi B+ RFID MODULE KIT 13.56 MHZ WITH TAGS SPI W AND R.
+ * Created by Elgolondrino, May, 2015. Thanks to Miguel Balboa
  * Rewritten by Søren Thing Andersen (access.thing.dk), fall of 2013 (Translation to English, refactored, comments, anti collision, cascade levels.)
  * Extended by Tom Clement with functionality to write to sector 0 of UID changeable Mifare cards.
  * Released into the public domain.
@@ -10,7 +9,7 @@
  * Search for "mf-rc522" on ebay.com to purchase the MF-RC522 board. 
  * 
  * There are three hardware components involved:
- * 1) The micro controller: An Arduino
+ * 1) The controller: Raspberry Pi 2 B or Raspberry Pi B+
  * 2) The PCD (short for Proximity Coupling Device): NXP MFRC522 Contactless Reader IC
  * 3) The PICC (short for Proximity Integrated Circuit Card): A card or tag using the ISO 14443A interface, eg Mifare or NTAG203.
  * 
@@ -295,7 +294,7 @@ public:
 	static const byte FIFO_SIZE = 64;		// The FIFO is 64 bytes.
 	
 	/////////////////////////////////////////////////////////////////////////////////////
-	// Functions for setting up the Arduino
+    // Functions for setting up the Raspberry Pi
 	/////////////////////////////////////////////////////////////////////////////////////
     MFRC522();
     void postConstruct();
@@ -378,8 +377,6 @@ public:
 	bool PICC_ReadCardSerial();	
 
 private:
-    //byte _chipSelectPin;		// Arduino pin connected to MFRC522's SPI slave select input (Pin 24, NSS, active low)
-//	byte _resetPowerDownPin;	// Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
 	byte MIFARE_TwoStepHelper(byte command, byte blockAddr, long data);
 };
 
