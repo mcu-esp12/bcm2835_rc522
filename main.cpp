@@ -159,6 +159,7 @@ int main() {
     mfrc522.PCD_Init();         // Init MFRC522 card
     // Change the block number to get information from by default it's 0
     printf("Try the most used default keys to print block 0 of a MIFARE PICC.\n");
+    printf("Press Ctrl + C to EXIT\n");
     while(keepReading) {
         loop();
     }
