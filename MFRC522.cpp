@@ -7,7 +7,7 @@
 #include <bcm2835.h>
 
 #define  DEFAULT_SPI_SPEED 5000L
-#define  PIN RPI_GPIO_P1_12
+#define  PIN RPI_V2_GPIO_P1_22
 /**
  * Constructor.
  * Prepares the output pins
